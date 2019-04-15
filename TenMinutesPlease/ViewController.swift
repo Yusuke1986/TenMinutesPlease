@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import AudioToolbox
 
 class ViewController: UIViewController {
 
@@ -32,6 +33,7 @@ class ViewController: UIViewController {
         timerBtn.setTitleColor(.white, for: .normal)
 
         // ボタンを押した時に実行するメソッドを指定
+        //Specify the method to be executed when the button is pressed
         timerBtn.addTarget(self, action: #selector(btnEvent(_:)), for: UIControl.Event.touchUpInside)
         
         newConstraints()
@@ -62,7 +64,9 @@ class ViewController: UIViewController {
         
         if timer.isValid == true {
             timer.invalidate()
-            timerCntInterval = elapsedTime
+            timerLabel.text = "10:00"
+            timerCnt = 0.0
+            timerCntInterval = 0.0
             timerBtn.setTitle("Start", for: .normal)
             
         }
@@ -79,26 +83,33 @@ class ViewController: UIViewController {
     
     @objc func timerCount() {
         // 経過した時間を、現在の時刻-開始時刻で算出(秒)
+        //Calculate the elapsed time as the current time-start time (seconds)
         elapsedTime = Date().timeIntervalSince1970 - timerCnt - timerCntInterval
         // 小数点以下を切り捨てる
+        //Truncate following decimal point
         let flooredErapsedTime = Int(floor(elapsedTime))
         // 残り時間 10min (60sec * 10)
-        let leftTime = 10 * 60 - flooredErapsedTime
+        //remaining time 10min (60sec * 10)
+        let leftTime = 1 * 60 - flooredErapsedTime
         
         let mm: Int = leftTime / 60
         let ss: Int = leftTime % 60
         
         let displayString = NSString(format: "%02d:%02d", mm, ss) as String
         // ラベルを更新
+        //update label
         timerLabel.text = displayString
         
         if leftTime == 0 {
             // タイマーを止める
+            //Stop the timer
             timer.invalidate()
             timerLabel.text = "10:00"
             timerCnt = 0.0
             timerCntInterval = 0.0
 
+            AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
+            
             let alert = UIAlertController(title: "Finish", message: "10 minutes", preferredStyle: .alert)
             let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
             alert.addAction(okAction)
